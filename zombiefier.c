@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <errno.h>
 
 bool parseArguments(int argc, char* argv[], int* num) {
     bool num_command = false; 
@@ -47,14 +48,14 @@ int main(int argc, char* argv[]) {
             exit(0);
         }
         if (pid < 0) {
-            printf("An error occurred while sending a fork was taking place.\n");
+            fprintf(stderr, "fork function call failed! Error #%d: %s\n", errno, strerror(errno));
             error_handler();
             return 1;
         }
     }
     if (pid) {
         if (kill(getpid(), SIGSTOP) < 0) {
-            printf("An error occurred while sending a SIGSTOP signal to the program.\n");
+            fprintf(stderr, "kill function call faile! Error #%d: %s\n", errno, strerror(errno));
             error_handler();
             return 1;
         }
@@ -62,12 +63,12 @@ int main(int argc, char* argv[]) {
     int w_result;
     for (int i = 0; i < num; i++) {
         if(wait(&w_result) < 0) {
-            printf("A problem occured with the wait system call.\n");
+            fprintf(stderr, "wait function call failed! Error #%d: %s\n", errno, strerror(errno));
             error_handler();
             return 1;
         }
         if (w_result < 0) {
-            printf("One of the child processes exited irregularly.\n");
+            printf("One of the child processes exited with an error!\n");
             error_handler();
             return 1;
         }
